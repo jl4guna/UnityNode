@@ -23,7 +23,9 @@ io.on('connection', function (socket) {
 
   //Escucha el evento move del cliente
   socket.on('move', function (data) {
-    console.log("Client moved!");
+    console.log("Client moved!", JSON.stringify(data));
+    //Envia el movimiento del jugador a todos los usuarios conectados
+    socket.broadcast.emit('move', data);
   });
 
   //Escucha las desconexiones
