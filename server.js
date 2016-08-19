@@ -11,19 +11,19 @@ var players = [];
 io.on('connection', function (socket) {
 
   //Generamos un identificador unico para esta conexion
-  const thisClientId = shortid.generate();
+  const thisPlayerId = shortid.generate();
 
   //Añadimos al nuevo jugador a la lista
-  players.push(thisClientId);
+  players.push(thisPlayerId);
 
-  console.log('client connected, broadcasting spawn, id:', thisClientId);
+  console.log('client connected, broadcasting spawn, id:', thisPlayerId);
 
   //Notifica a todos los clientes conectados
-  socket.broadcast.emit("spawn", { id: thisClientId });
+  socket.broadcast.emit("spawn", { id: thisPlayerId });
 
   //Emite la lista de jugadores conectados
   players.forEach(function(playerId){
-    if(playerId === thisClientId)
+    if(playerId === thisPlayerId)
       return;
     socket.emit('spawn', {id: playerId});
     console.log('Sending spawn to new player for id: ' + playerId);
@@ -31,7 +31,7 @@ io.on('connection', function (socket) {
 
   //Escucha el evento move del cliente
   socket.on('move', function (data) {
-    data.id = thisClientId;
+    data.id = thisPlayerId;
     console.log("Client moved!", JSON.stringify(data));
     //Envia el movimiento del jugador a todos los usuarios conectados
     socket.broadcast.emit('move', data);
@@ -40,6 +40,12 @@ io.on('connection', function (socket) {
   //Escucha las desconexiones
   socket.on('disconnect', function () {
     console.log('client disconnected');
+
+    //Eliminamos al player de la lista
+    players.splice(players.indexOf(thisPlayerId, 1));
+    //Avisa a los clientes conectados que el usuario con el id fue eliminado
+    socket.broadcast.emit('disconnected', {id: thisPlayerId});
+
   })
 
 });
