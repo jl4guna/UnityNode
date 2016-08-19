@@ -20,6 +20,7 @@ io.on('connection', function (socket) {
 
   //Notifica a todos los clientes conectados
   socket.broadcast.emit("spawn", { id: thisPlayerId });
+  socket.broadcast.emit("requestPosition");
 
   //Emite la lista de jugadores conectados
   players.forEach(function(playerId){
@@ -35,6 +36,15 @@ io.on('connection', function (socket) {
     console.log("Client moved!", JSON.stringify(data));
     //Envia el movimiento del jugador a todos los usuarios conectados
     socket.broadcast.emit('move', data);
+  });
+
+  socket.on('updatePosition', function (data) {
+    console.log(data);
+
+    data.id = thisPlayerId;
+
+    socket.broadcast.emit('updatePosition', data);
+
   });
 
   //Escucha las desconexiones
