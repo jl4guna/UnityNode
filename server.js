@@ -1,6 +1,7 @@
 'use strict';
 //Inicia el servidor
 const io = require('socket.io')(process.env.PORT || 3000);
+const shortid = require('shortid');
 
 console.log('server starter');
 
@@ -8,7 +9,11 @@ var playerCount = 0;
 
 //Escucha las conexiones
 io.on('connection', function (socket) {
-  console.log('client connected, broadcasting spawn');
+
+  //Generamos un identificador unico para esta conexion
+  const thisClientId = shortid.generate();
+
+  console.log('client connected, broadcasting spawn, id:', thisClientId);
 
   //Notifica a todos los clientes conectados
   socket.broadcast.emit("spawn");
@@ -23,6 +28,7 @@ io.on('connection', function (socket) {
 
   //Escucha el evento move del cliente
   socket.on('move', function (data) {
+    data.id = thisClientId;
     console.log("Client moved!", JSON.stringify(data));
     //Envia el movimiento del jugador a todos los usuarios conectados
     socket.broadcast.emit('move', data);
